@@ -23,7 +23,7 @@ fog_set.input("testcase/small")
 traffic = constant.traffic
 bundle_list = []
 
-while traffic > 0:
+while traffic > constant.least_error:
     # Edge and all of fog would calculate its own maximum traffic
     if edge.used == False:
         edge.algorithm(traffic, constant.max_latency, constant.least_error)
@@ -33,7 +33,11 @@ while traffic > 0:
         if f.used == False:
             f.algorithm(traffic, constant.max_latency, constant.least_error)
             bundle_list.append({'id': f.index, 'traffic': f.max_traffic, 'cost': f.fog_cost(), 'CP': f.max_traffic / f.fog_cost(), 'chosen': False})
-    
+
+    if not bundle_list:
+        print("There is no enough capacity")
+        break
+
     # Sort by CP value
     bundle_list.sort(key=lambda b : b['CP'], reverse=True)
     traffic_sum = 0

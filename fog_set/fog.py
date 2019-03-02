@@ -44,6 +44,7 @@ class Fog:
     def algorithm(self, traffic, max_latency, least_error):
         
         # start from number of vehicles whose usage_time bigger equal than max_latency
+        self.vehicle_set.sort(key=lambda v : v.cost)
         self.vehicle_set.sort(key=lambda v : v.usage_time, reverse=True)
         used_vehicles = sum([v.used(max_latency) for v in self.vehicle_set])
 
