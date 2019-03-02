@@ -54,9 +54,9 @@ class Fog_Set:
     def display(self):
         self.fog_list.sort(key=lambda f : f.index)
         table = pt.PrettyTable()
-        table.add_column("Index", [ "Probability", "Used vehicles", "Cost"])
+        table.add_column("Index", [ "Probability", "Used vehicles", "Cost", "Latency"])
         for f in self.fog_list:
-            table.add_column (str(f.index), [f.max_traffic / self.total_traffic, f.used_vehicles, f.fog_cost()])
+            table.add_column (str(f.index), [f.max_traffic / self.total_traffic, f.used_vehicles, f.fog_cost(), f.latency])
         print("Fog")
         print(table)
         used_bits_table = pt.PrettyTable()

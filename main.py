@@ -10,7 +10,7 @@ from constant.constant import Constant
 # Initial
 
 # Constant: traffic, ratio, max_latency, least_error
-constant = Constant(5000, 0.01, 1, 1)
+constant = Constant(5000, 0.01, 0.1, 1)
 
 # Edge: capacity, max_servers, cost
 edge = Edge(constant.traffic, 1000, 3, 10)

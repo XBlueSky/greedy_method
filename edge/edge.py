@@ -6,6 +6,7 @@ class Edge:
     used                = False
     active_servers      = 0
     max_traffic         = 0
+    latency             = 0
 
     def __init__(self, traffic, capacity, max_servers, cost):
         self.total_traffic      = traffic
@@ -51,7 +52,7 @@ class Edge:
             active_servers = active_servers - 1 
         
         self.active_servers = active_servers + 1
-
+        self.latency = self.computation_latency(self.max_traffic, self.active_servers)
         # return [0, self.max_traffic, self.edge_cost()]
         # gradient descent
 
@@ -100,7 +101,7 @@ class Edge:
 
     def display(self):
         table = pt.PrettyTable()
-        table.field_names = ["Offloading Probability", "Active servers number", "cost"]
-        table.add_row([self.max_traffic / self.total_traffic, self.active_servers, self.edge_cost()])
+        table.field_names = ["Offloading Probability", "Active servers number", "Cost", "Latency"]
+        table.add_row([self.max_traffic / self.total_traffic, self.active_servers, self.edge_cost(), self.latency])
         print("Edge")
         print(table)

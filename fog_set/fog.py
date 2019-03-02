@@ -6,6 +6,7 @@ class Fog:
     vehicle_set     = []
     used_vehicles   = 0
     max_traffic     = 0
+    latency         = 0
 
     def __init__(self, index, capacity, total_vehicles, edge_transmission_rate, fog_transmission_rate):
         self.index                      = index
@@ -81,6 +82,8 @@ class Fog:
         for num in range(used_vehicles):
             self.vehicle_set[num].used_bit = True
         self.used_vehicles = used_vehicles
+        communication_latency = self.edge_communication_latency(self.max_traffic) + self.fog_communication_latency(self.max_traffic)
+        self.latency = communication_latency + self.computation_latency(self.max_traffic, self.used_vehicles)
 
     def bisection_method(self, traffic, used_vehicles, max_latency, least_error):
         lower   = 0
