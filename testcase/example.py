@@ -1,14 +1,14 @@
 ###################################################################
 # Input File example                                              #
 ###################################################################
-# 100              Traffic inputs (MB/s)                          #
+# 100              Traffic inputs (MB/s)                          #(variable)
 # 0.01             Ratio of the Input traffic and output traffic  #
-# 5                Maximum latency (s)                            #
+# 5                Maximum latency (s)                            #(variable)
 # 1                least error                                    #
 ############################    Edge   ############################
 # 10000            Transmission rate of edge (MB/s)               #
 # 1000             Capacity of single server (MB/s)               #
-# 10               Unit cost of single server in edge             #
+# 10               Unit cost of single server in edge             #(variable)
 # 2                Maximum servers in edge                        #
 ############################    Fog    ############################
 # 3000             Transmission rate of vehicles (MB/s)           #
