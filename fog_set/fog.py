@@ -38,6 +38,7 @@ class Fog:
     def clear(self):
         self.max_traffic    = 0
         self.used_vehicles  = 0
+        self.latency         = 0
         for f in self.vehicle_set:
             f.used_bit = False
 

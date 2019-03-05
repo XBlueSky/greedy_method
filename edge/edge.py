@@ -101,7 +101,7 @@ class Edge:
 
     def display(self):
         table = pt.PrettyTable()
-        table.field_names = ["Offloading Probability", "Active servers number", "Cost", "Latency"]
-        table.add_row([self.max_traffic / self.total_traffic, self.active_servers, self.edge_cost(), self.latency])
+        table.field_names = ["Traffic", "Offloading Probability", "Active servers number", "Cost", "Latency"]
+        table.add_row([self.max_traffic, self.max_traffic / self.total_traffic, self.active_servers, self.edge_cost(), self.latency])
         print("Edge")
         print(table)

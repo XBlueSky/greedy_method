@@ -1,23 +1,24 @@
 from edge.edge import Edge
 from fog_set.fog_set import Fog_Set
 from constant.constant import Constant
-# from argparse import ArgumentParser
+from argparse import ArgumentParser
 
-# parser = ArgumentParser(description= "Greedy Method")
-# parser.add_argument("filename", help="file path")
-# args = parser.parse_args()
+parser = ArgumentParser(description= "Greedy Method")
+parser.add_argument("filename", help="testcase file path")
+args = parser.parse_args()
 
 # Initial
 
 # Constant: traffic, ratio, max_latency, least_error
-constant = Constant(5000, 0.01, 0.1, 1)
+constant = Constant(600, 0.01, 1, 1)
 
-# Edge: capacity, max_servers, cost
-edge = Edge(constant.traffic, 1000, 3, 10)
+# Edge: traffic, capacity, max_servers, cost
+edge = Edge(constant.traffic, 10, 10, 100)
 
-# Fog_Set: ratio, edge_transmission_rate, fog_transmission_rate, capacity, total_fogs, vehicle_num_in_fogs = []
-fog_set = Fog_Set(constant.traffic, constant.ratio, 10000, 3000, 300, 2, [3,5])
-fog_set.input("testcase/small")
+# Fog_Set: traffic, ratio, edge_transmission_rate, fog_transmission_rate, capacity, total_fogs, testcase file
+fogs_num = args.filename.split("_")
+file_name = "testcase/"+args.filename
+fog_set = Fog_Set(constant.traffic, constant.ratio, 1250, 125, 5, int(fogs_num[1]), file_name)
 
 # 0/1 knapsack problem with (1 − 1/ sqrt(e)) bound
 traffic = constant.traffic
@@ -78,6 +79,8 @@ while traffic > constant.least_error:
                 else:
                     fog_set.fog_list[bundle['id']].clear()
     bundle_list.clear()
+
+
 
 edge.display()
 fog_set.display()

@@ -3,15 +3,13 @@ import prettytable as pt
 
 class Fog_Set:
     fog_list            = []
-    def __init__(self, traffic, ratio, edge_transmission_rate, fog_transmission_rate, capacity, total_fogs, vehicle_num_in_fogs = []):
+    def __init__(self, traffic, ratio, edge_transmission_rate, fog_transmission_rate, capacity, total_fogs, file_name):
         self.total_traffic      = traffic
         self.ratio              = ratio
         self.total_fogs         = total_fogs
-        self.max_vehicles       = max(vehicle_num_in_fogs)
-        for index, vehicle_num in enumerate(vehicle_num_in_fogs):
-            self.fog_list.append( Fog(index, capacity, vehicle_num, edge_transmission_rate, fog_transmission_rate))
-
-    def input(self, file_name):
+        # self.max_vehicles       = max(vehicle_num_in_fogs)
+        # for index, vehicle_num in enumerate(vehicle_num_in_fogs):
+        vehicle_num_in_fogs = []    
         file = open(file_name,'r')
         for i,line in enumerate(file):
             if i % 4 == 0:
@@ -23,7 +21,10 @@ class Fog_Set:
             else:
                 threshold_power_set = list( map( int, line.split()))
                 index = i // 4
+                vehicle_num_in_fogs.append(len(cost_set))
+                self.fog_list.append( Fog(index, capacity, vehicle_num_in_fogs[index], edge_transmission_rate, fog_transmission_rate))
                 self.fog_list[index].set_vehicle_set(cost_set, consumption_rate_set, initial_power_set, threshold_power_set)
+        self.max_vehicles = max(vehicle_num_in_fogs)
 
     def used_bits_table(self):
         return [f.used_bits_list() for f in sorted(self.fog_list, key=lambda f : f.index)]
@@ -54,9 +55,9 @@ class Fog_Set:
     def display(self):
         self.fog_list.sort(key=lambda f : f.index)
         table = pt.PrettyTable()
-        table.add_column("Index", [ "Probability", "Used vehicles", "Cost", "Latency"])
+        table.add_column("Index", ["Traffic", "Probability", "Used vehicles", "Cost", "Latency"])
         for f in self.fog_list:
-            table.add_column (str(f.index), [f.max_traffic / self.total_traffic, f.used_vehicles, f.fog_cost(), f.latency])
+            table.add_column (str(f.index), [f.max_traffic, f.max_traffic / self.total_traffic, f.used_vehicles, f.fog_cost(), f.latency])
         print("Fog")
         print(table)
         used_bits_table = pt.PrettyTable()
