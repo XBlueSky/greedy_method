@@ -28,10 +28,12 @@ fog_set = Fog_Set(constant.ratio, 1250, 125, 5, int(fogs_num[1]), file_name)
 
 for t in range(0, 1600, 100):
 # for l in [x * 0.01 for x in range(1, 200, 1)]:
-    
+    traffic_list.append(t)
+    # for a in [0, 1]:
     # 0/1 knapsack problem with (1 − 1/ sqrt(e)) bound
     traffic = t
     # traffic = constant.traffic
+    # latency = l
     latency = constant.max_latency
     bundle_list = []
 
@@ -61,58 +63,73 @@ for t in range(0, 1600, 100):
                 break
 
         # The modified point
-        another = max(bundle_list, key=lambda b : b['traffic'])
+        # if a == 0:
+        #     another = max(bundle_list, key=lambda b : b['traffic'])
 
-        if traffic_sum >= another['traffic']:
-            traffic = traffic - traffic_sum
-            for bundle in bundle_list:
-                if bundle['chosen'] == True:
-                    if bundle['id'] == 'edge':
-                        edge.used = True
-                    else:
-                        fog_set.fog_list[bundle['id']].used = True
+        #     if traffic_sum >= another['traffic']:
+        #         traffic = traffic - traffic_sum
+        #         for bundle in bundle_list:
+        #             if bundle['chosen'] == True:
+        #                 if bundle['id'] == 'edge':
+        #                     edge.used = True
+        #                 else:
+        #                     fog_set.fog_list[bundle['id']].used = True
+        #             else:
+        #                 if bundle['id'] == 'edge':
+        #                     edge.clear()
+        #                 else:
+        #                     fog_set.fog_list[bundle['id']].clear()
+        #     else:
+        #         traffic = traffic - another['traffic']
+        #         for bundle in bundle_list:
+        #             if bundle['id'] == another['id']:
+        #                 if another['id'] == 'edge':
+        #                     edge.used = True
+        #                 else:
+        #                     fog_set.fog_list[another['id']].used = True
+        #             else:
+        #                 if bundle['id'] == 'edge':
+        #                     edge.clear()
+        #                 else:
+        #                     fog_set.fog_list[bundle['id']].clear()
+        # else:
+        traffic = traffic - traffic_sum
+        for bundle in bundle_list:
+            if bundle['chosen'] == True:
+                if bundle['id'] == 'edge':
+                    edge.used = True
                 else:
-                    if bundle['id'] == 'edge':
-                        edge.clear()
-                    else:
-                        fog_set.fog_list[bundle['id']].clear()
-        else:
-            traffic = traffic - another['traffic']
-            for bundle in bundle_list:
-                if bundle['id'] == another['id']:
-                    if another['id'] == 'edge':
-                        edge.used = True
-                    else:
-                        fog_set.fog_list[another['id']].used = True
+                    fog_set.fog_list[bundle['id']].used = True
+            else:
+                if bundle['id'] == 'edge':
+                    edge.clear()
                 else:
-                    if bundle['id'] == 'edge':
-                        edge.clear()
-                    else:
-                        fog_set.fog_list[bundle['id']].clear()
+                    fog_set.fog_list[bundle['id']].clear()
         bundle_list.clear()
 
-    traffic_list.append(t)
     # latency_list.append(l)
-    total_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
+    # if a == 0:
+    #     total_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
+    # else:
     total_cost_un.append(edge.edge_cost() + fog_set.fog_set_cost())
     edge.clear()
     fog_set.clear()
 
 # output to static HTML file
-# output_file("graph/traffic-cost.html")
-output_file("graph/fixed_latency-cost.html")
+output_file("graph/greddtORnot_traffic-cost.html")
+# output_file("graph/latency-cost.html")
 
-source_mm1 = ColumnDataSource(data=dict(
-        x=traffic_list,
-        # x=latency_list,
-        y=total_cost,
-    ))
-
-# source_mm2 = ColumnDataSource(data=dict(
+# source_mm1 = ColumnDataSource(data=dict(
 #         x=traffic_list,
 #         # x=latency_list,
-#         y=total_cost_un,
+#         y=total_cost,
 #     ))
+
+source_mm2 = ColumnDataSource(data=dict(
+        x=traffic_list,
+        # x=latency_list,
+        y=total_cost_un,
+    ))
 
 TOOLTIPS = [
         ("index", "$index"),
@@ -125,11 +142,11 @@ p = figure(plot_width=1000, plot_height=700, x_axis_label='Araival Traffic', y_a
 # p = figure(title="traffic to cost", x_axis_label='traffic', y_axis_label='cost')
 
 # add a line renderer with legend and line thickness
-p.line(traffic_list, total_cost, legend="greedy.", line_width=3)
-# p.line(traffic_list, total_cost_un, legend="greedy.", line_width=3, line_color="red")
+# p.line(traffic_list, total_cost, legend="greedy.", line_width=3)
+p.line(traffic_list, total_cost_un, legend="unmodified greedy.", line_width=3, line_color="red")
 # p.line(latency_list, total_cost, legend="greedy.", line_width=3)
-p.circle('x', 'y', size=7, source=source_mm1)
-# p.circle('x', 'y', fill_color="red", line_color="red", size=7, source=source_mm2)
+# p.circle('x', 'y', size=7, source=source_mm1)
+p.circle('x', 'y', fill_color="red", line_color="red", size=7, source=source_mm2)
 # p.line(traffic_list, total_cost, legend="greedy.", line_width=2)
 
 # show the results
