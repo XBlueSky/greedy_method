@@ -3,12 +3,10 @@ import prettytable as pt
 
 class Fog_Set:
     fog_list            = []
-    def __init__(self, traffic, ratio, edge_transmission_rate, fog_transmission_rate, capacity, total_fogs, file_name):
-        self.total_traffic      = traffic
+    def __init__(self, ratio, edge_transmission_rate, fog_transmission_rate, capacity, total_fogs, file_name):
         self.ratio              = ratio
         self.total_fogs         = total_fogs
-        # self.max_vehicles       = max(vehicle_num_in_fogs)
-        # for index, vehicle_num in enumerate(vehicle_num_in_fogs):
+
         vehicle_num_in_fogs = []    
         file = open(file_name,'r')
         for i,line in enumerate(file):
@@ -25,6 +23,10 @@ class Fog_Set:
                 self.fog_list.append( Fog(index, capacity, vehicle_num_in_fogs[index], edge_transmission_rate, fog_transmission_rate))
                 self.fog_list[index].set_vehicle_set(cost_set, consumption_rate_set, initial_power_set, threshold_power_set)
         self.max_vehicles = max(vehicle_num_in_fogs)
+        file.close()
+
+    def set_traffic(self, traffic):
+        self.total_traffic      = traffic
 
     def used_bits_table(self):
         return [f.used_bits_list() for f in sorted(self.fog_list, key=lambda f : f.index)]
@@ -32,6 +34,10 @@ class Fog_Set:
     def fog_set_cost(self):
         return sum([f.fog_cost() for f in self.fog_list])
 
+    def clear(self):
+        for f in self.fog_list:
+            f.clear()
+            
     # def algorithm(self, traffic, max_latency, least_error):
 
     #     # All of fog would calculate its own maximum traffic

@@ -8,12 +8,14 @@ class Edge:
     max_traffic         = 0
     latency             = 0
 
-    def __init__(self, traffic, capacity, max_servers, cost):
-        self.total_traffic      = traffic
+    def __init__(self, capacity, max_servers, cost):
         self.capacity           = capacity
         self.max_servers        = max_servers
         self.cost               = cost
     
+    def set_traffic(self, traffic):
+        self.total_traffic      = traffic
+
     def computation_latency(self, traffic, active_servers):
         # check number of servers constraint
         if active_servers <= self.max_servers:
@@ -27,6 +29,8 @@ class Edge:
     def clear(self):
         self.active_servers     = 0
         self.max_traffic        = 0
+        self.latency            = 0
+        self.used               = False
         
     # local computation in edge
     def algorithm(self, traffic, max_latency, least_error):
