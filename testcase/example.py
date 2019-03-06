@@ -7,11 +7,11 @@
 # 1                least error                                    #
 ############################    Edge   ############################
 # 1250  (10 Gbps)  Transmission rate of edge (MB/s)               #
-# 20               Capacity of single server (MB/s)               #
-# 10               Unit cost of single server in edge             #
+# 10               Capacity of single server (MB/s)               #
+# 20               Unit cost of single server in edge             #
 # 10               Maximum servers in edge                        #
 ############################    Fog    ############################
-# 125   (1 Gbps)   Transmission rate of vehicles (MB/s)           #
+# 1250  (10 Gbps)  Transmission rate of vehicles (MB/s)           #
 # 5                Capacity of vehicles (MB/s)                    #
 # 2                Number of fogs                                 #
 # 3 5              Number of vehicles in fog                      #

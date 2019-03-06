@@ -15,7 +15,7 @@ with open("../testcase/fog_" + args.fog_num, 'w') as fp:
         # cost
         if args.cost == "diff":
             for v in range(vehicle_num):
-                diff_cost = random.randint(1, 100)
+                diff_cost = random.randint(5, 50)
                 fp.write(str(diff_cost) + " ")
         else:
             for v in range(vehicle_num):

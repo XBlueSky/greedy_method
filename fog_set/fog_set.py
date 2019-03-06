@@ -33,11 +33,14 @@ class Fog_Set:
 
     def fog_set_cost(self):
         return sum([f.fog_cost() for f in self.fog_list])
+    
+    def fog_set_fixed_cost(self, cost):
+        return sum([f.fog_fixed_cost(cost) for f in self.fog_list])
 
     def clear(self):
         for f in self.fog_list:
             f.clear()
-            
+
     # def algorithm(self, traffic, max_latency, least_error):
 
     #     # All of fog would calculate its own maximum traffic

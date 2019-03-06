@@ -35,6 +35,9 @@ class Fog:
     def fog_cost(self):
         return sum([v.used_bit * v.cost for v in self.vehicle_set])
     
+    def fog_fixed_cost(self, cost):
+        return sum([v.used_bit * cost for v in self.vehicle_set])
+    
     def clear(self):
         self.max_traffic    = 0
         self.used_vehicles  = 0
