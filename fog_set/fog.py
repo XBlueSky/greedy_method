@@ -53,7 +53,8 @@ class Fog:
         self.vehicle_set.sort(key=lambda v : v.cost)
         self.vehicle_set.sort(key=lambda v : v.usage_time, reverse=True)
         used_vehicles = sum([v.used(max_latency) for v in self.vehicle_set])
-
+        self.vehicle_set[0:used_vehicles].sort(key=lambda v : v.cost)
+        
         # find maximum traffic
         # check arrival traffic is larger than the traffic that can be handle in edge
         total_latency = self.edge_communication_latency(traffic) + self.computation_latency(traffic, used_vehicles) + self.fog_communication_latency(traffic)
