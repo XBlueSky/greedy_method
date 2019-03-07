@@ -12,15 +12,15 @@ args = parser.parse_args()
 
 # traffic_list        = []
 latency_list        = []
-total_cost          = []
-edge_cost           = []
-fog_cost            = []
-total_cost_fixed    = []
-edge_cost_fixed     = []
-fog_cost_fixed      = []
-# CP_cost             = []
-# cost_cost           = []
-# traffic_cost        = []
+# total_cost          = []
+# edge_cost           = []
+# fog_cost            = []
+# total_cost_fixed    = []
+# edge_cost_fixed     = []
+# fog_cost_fixed      = []
+CP_cost             = []
+cost_cost           = []
+traffic_cost        = []
 
 # Initial
 
@@ -35,18 +35,18 @@ fogs_num = args.filename.split("_")
 file_name = "testcase/"+args.filename
 fog_set = Fog_Set(constant.ratio, 1250, 1250, 5, int(fogs_num[1]), file_name)
 
-collections = ["edge_10"]
-colors      = ['#0D3331', 'darkslategray', "#75968f", "#a5bab7", "#c9d9d3", "#e2e2e2", "#dfccce", "#ddb7b1", "#cc7878", "#933b41", "#550b1d"]
-for f in fog_set.fog_list:
-    collections.append("F" + str(f.index) + "_" + str(f.total_vehicles))
-data = dict((c,[]) for c in collections)
-data['latency'] = []
+# collections = ["edge_10"]
+# colors      = ['#0D3331', 'darkslategray', "#75968f", "#a5bab7", "#c9d9d3", "#e2e2e2", "#dfccce", "#ddb7b1", "#cc7878", "#933b41", "#550b1d"]
+# for f in fog_set.fog_list:
+#     collections.append("F" + str(f.index) + "_" + str(f.total_vehicles))
+# data = dict((c,[]) for c in collections)
+# data['latency'] = []
 
 for l in [x * 0.01 for x in range(1, 100, 2)]:
 
     # for cost_type in ['fixed', 'diff']:
-    for cost_type in ['diff']:
-    # for algorithm_type in ['cost', 'traffic', 'CP']:
+    # for cost_type in ['diff']:
+    for algorithm_type in ['cost', 'traffic', 'CP']:
         # 0/1 knapsack problem with (1 − 1/ sqrt(e)) bound
         traffic = constant.traffic
         latency = l
@@ -61,11 +61,11 @@ for l in [x * 0.01 for x in range(1, 100, 2)]:
             for f in fog_set.fog_list:
                 if f.used == False:
                     f.algorithm(traffic, latency, constant.least_error)
-                    if cost_type == 'fixed':
-                        cost = f.fog_fixed_cost(25)
-                    else:
-                        cost = f.fog_cost()
-                    # cost = f.fog_cost()
+                    # if cost_type == 'fixed':
+                    #     cost = f.fog_fixed_cost(10)
+                    # else:
+                    #     cost = f.fog_cost()
+                    cost = f.fog_cost()
                     bundle_list.append({'id': f.index, 'traffic': f.max_traffic, 'cost': cost, 'CP': f.max_traffic / cost, 'chosen': False})
 
             if not bundle_list:
@@ -73,13 +73,13 @@ for l in [x * 0.01 for x in range(1, 100, 2)]:
                 break
 
             # Sort by CP value
-            # if algorithm_type == 'CP':
-            #     bundle_list.sort(key=lambda b : b['CP'], reverse=True)
-            # elif algorithm_type == 'cost':
-            #     bundle_list.sort(key=lambda b : b['cost'], reverse=False)
-            # else:
-            #     bundle_list.sort(key=lambda b : b['traffic'], reverse=True)
-            bundle_list.sort(key=lambda b : b['CP'], reverse=True)
+            if algorithm_type == 'CP':
+                bundle_list.sort(key=lambda b : b['CP'], reverse=True)
+            elif algorithm_type == 'cost':
+                bundle_list.sort(key=lambda b : b['cost'], reverse=False)
+            else:
+                bundle_list.sort(key=lambda b : b['traffic'], reverse=True)
+            # bundle_list.sort(key=lambda b : b['CP'], reverse=True)
             traffic_sum = 0
             for bundle in bundle_list:
                 if traffic_sum + bundle['traffic'] <= traffic:
@@ -119,22 +119,22 @@ for l in [x * 0.01 for x in range(1, 100, 2)]:
                             fog_set.fog_list[bundle['id']].clear()
             bundle_list.clear()
 
-        if cost_type == 'fixed':
-            # latency_list.append(l)
-            total_cost_fixed.append(edge.edge_cost() + fog_set.fog_set_fixed_cost(25))
-            edge_cost_fixed.append(edge.edge_cost())
-            fog_cost_fixed.append(fog_set.fog_set_fixed_cost(25))
-        else:
-            data['latency'].append('{:10.2f}'.format(l))
-            latency_list.append('{:10.2f}'.format(l))
-            for i, c in enumerate(collections):
-                if i == 0:
-                    data[c].append(edge.max_traffic / constant.traffic)
-                else:
-                    if fog_set.fog_list[i - 1].max_traffic > 0:
-                        data[c].append(fog_set.fog_list[i - 1].max_traffic / constant.traffic)
-                    else:
-                        data[c].append(0)
+        # if cost_type == 'fixed':
+        #     # latency_list.append(l)
+        #     total_cost_fixed.append(edge.edge_cost() + fog_set.fog_set_fixed_cost(10))
+        #     edge_cost_fixed.append(edge.edge_cost())
+        #     fog_cost_fixed.append(fog_set.fog_set_fixed_cost(10))
+        # else:
+        #     # data['latency'].append('{:10.2f}'.format(l))
+            # latency_list.append('{:10.2f}'.format(l))
+            # for i, c in enumerate(collections):
+            #     if i == 0:
+            #         data[c].append(edge.max_traffic / constant.traffic)
+            #     else:
+            #         if fog_set.fog_list[i - 1].max_traffic > 0:
+            #             data[c].append(fog_set.fog_list[i - 1].max_traffic / constant.traffic)
+            #         else:
+            #             data[c].append(0)
             # data['latency'].append('{:10.2f}'.format(l))
             # latency_list.append('{:10.2f}'.format(l))
             # for i, c in enumerate(collections):
@@ -147,40 +147,41 @@ for l in [x * 0.01 for x in range(1, 100, 2)]:
             # edge_cost.append(edge.edge_cost())
             # fog_cost.append(fog_set.fog_set_cost())
         
-        # if algorithm_type == 'CP':
-        #     latency_list.append(l)
-        #     CP_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
-        # elif algorithm_type == 'cost':
-        #     cost_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
-        # else:
-        #     traffic_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
+        if algorithm_type == 'CP':
+            latency_list.append(l)
+            CP_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
+        elif algorithm_type == 'cost':
+            cost_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
+        else:
+            traffic_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
         edge.clear()
         fog_set.clear()
 
 # output to static HTML file
-output_file("graph/latency/traffic-distribution_1000.html")
+output_file("graph/latency/1000-traffic-algorithm_1.html")
 
-p = figure(x_range=latency_list, plot_width=1600, plot_height=900, title="1000 traffic distribution",
-            tooltips="$name \ @$name")
+# p = figure(x_range=latency_list, plot_width=1600, plot_height=900, title="500-traffic edge and fog distribution",
+#             tooltips="$name \ @$name")
 
-p.vbar_stack(collections, x='latency', width=0.9, color=colors, source=data,
-             legend=[value(x) for x in collections])
+# p.vbar_stack(collections, x='latency', width=0.9, color=colors, source=data,
+#              legend=[value(x) for x in collections])
 
-p.y_range.start = 0
-p.x_range.range_padding = 0.1
-p.xgrid.grid_line_color = None
-p.axis.minor_tick_line_color = None
-p.outline_line_color = None
-p.legend.location = "top_left"
-p.legend.orientation = "horizontal"
+# p.y_range.start = 0
+# p.x_range.range_padding = 0.1
+# p.xgrid.grid_line_color = None
+# p.axis.minor_tick_line_color = None
+# p.outline_line_color = None
+# p.legend.location = "top_left"
+# p.legend.orientation = "horizontal"
 
-# TOOLTIPS = [
-#         ("index", "$index"),
-#         ("traffic", "$x"),
-#         ("cost", "$y"),
-#     ]
+TOOLTIPS = [
+        ("index", "$index"),
+        ("traffic", "$x"),
+        ("cost", "$y"),
+    ]
+
 # create a new plot with a title and axis labels
-# p = figure(plot_width=1600, plot_height=840, x_axis_label='Max latency', y_axis_label='Cost', tooltips=TOOLTIPS)
+p = figure(plot_width=1600, plot_height=840, x_axis_label='Max latency', y_axis_label='Cost', tooltips=TOOLTIPS)
 # p = figure(title="traffic to cost", x_axis_label='traffic', y_axis_label='cost')
 
 # add a line renderer with legend and line thickness
@@ -190,9 +191,9 @@ p.legend.orientation = "horizontal"
 # p.line(latency_list, total_cost_fixed, legend="total-fixed.", line_width=3, line_color="red")
 # p.line(latency_list, edge_cost_fixed, legend="edge-fixed.", line_width=3, line_color="tomato")
 # p.line(latency_list, fog_cost_fixed, legend="fog-fixed.", line_width=3, line_color="pink")
-# p.line(latency_list, CP_cost, legend="CP.", line_width=3)
-# p.line(latency_list, cost_cost, legend="cost.", line_width=3, line_color="#e84d60")
-# p.line(latency_list, traffic_cost, legend="traffic.", line_width=3, line_color="lightseagreen")
+p.line(latency_list, CP_cost, legend="CP.", line_width=3)
+p.line(latency_list, cost_cost, legend="cost.", line_width=3, line_color="#e84d60")
+p.line(latency_list, traffic_cost, legend="traffic.", line_width=3, line_color="lightseagreen")
 
 
 # p.circle(latency_list, total_cost, size=7)
@@ -201,9 +202,9 @@ p.legend.orientation = "horizontal"
 # p.circle(latency_list, total_cost_fixed, fill_color="red", line_color="red", size=7)
 # p.circle(latency_list, edge_cost_fixed, fill_color="tomato", line_color="tomato", size=7)
 # p.circle(latency_list, fog_cost_fixed, fill_color="pink", line_color="pink", size=7)
-# p.circle(latency_list, CP_cost, size=7)
-# p.circle(latency_list, cost_cost, fill_color="#e84d60", line_color="#e84d60", size=7)
-# p.circle(latency_list, traffic_cost, fill_color="lightseagreen", line_color="lightseagreen", size=7)
+p.circle(latency_list, CP_cost, size=7)
+p.circle(latency_list, cost_cost, fill_color="#e84d60", line_color="#e84d60", size=7)
+p.circle(latency_list, traffic_cost, fill_color="lightseagreen", line_color="lightseagreen", size=7)
 
 
 # show the results

@@ -67,12 +67,18 @@ class Fog_Set:
         table.add_column("Index", ["Traffic", "Probability", "Used vehicles", "Cost", "Latency"])
         for f in self.fog_list:
             table.add_column (str(f.index), [f.max_traffic, f.max_traffic / self.total_traffic, f.used_vehicles, f.fog_cost(), f.latency])
-        print("Fog")
-        print(table)
+        # print("Fog")
+        # print(table)
         used_bits_table = pt.PrettyTable()
         used_bits_table.add_column("Vehicles / Fog", [str(i) for i in range(self.max_vehicles)])
         for index, f in enumerate(self.used_bits_table()):
             f = [int(i) for i in f]
             f.extend(["N/A"] * (self.max_vehicles - len(f)))
             used_bits_table.add_column(str(index), f)
-        print(used_bits_table)
+        # print(used_bits_table)
+
+        data = table.get_string()
+        vData = used_bits_table.get_string()
+        with open('graph/table/' + str(self.total_traffic) + '.txt', "a") as f:
+            f.write(data)
+            f.write(vData)
