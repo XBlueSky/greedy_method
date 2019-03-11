@@ -28,7 +28,7 @@ traffic_cost        = []
 constant = Constant(500, 0.01, 1, 1)
 
 # Edge: capacity, max_servers, cost
-edge = Edge(20, 10, 20)
+edge = Edge(200, 5, 200)
 
 # Fog_Set: ratio, edge_transmission_rate, fog_transmission_rate, capacity, total_fogs, testcase file
 fogs_num = args.filename.split("_")
@@ -46,9 +46,9 @@ for t in range(100, 3000, 50):
     
     # edge.set_traffic(t)
     # fog_set.set_traffic(t)
-
-    # for cost_type in ['fixed', 'diff']:
-    for cost_type in ['diff']:
+    success = True
+    for cost_type in ['fixed', 'diff']:
+    # for cost_type in ['diff']:
     # for algorithm_type in ['cost', 'traffic', 'CP']:
         # 0/1 knapsack problem with (1 − 1/ sqrt(e)) bound
         traffic = t
@@ -63,15 +63,16 @@ for t in range(100, 3000, 50):
             for f in fog_set.fog_list:
                 if f.used == False:
                     f.algorithm(traffic, constant.max_latency, constant.least_error)
-                    # if cost_type == 'fixed':
-                    #     cost = f.fog_fixed_cost(25)
-                    # else:
-                    #     cost = f.fog_cost()
-                    cost = f.fog_cost()
+                    if cost_type == 'fixed':
+                        cost = f.fog_fixed_cost(5)
+                    else:
+                        cost = f.fog_cost()
+                    # cost = f.fog_cost()
                     bundle_list.append({'id': f.index, 'traffic': f.max_traffic, 'cost': cost, 'CP': f.max_traffic / cost, 'chosen': False})
 
             if not bundle_list:
                 # print("There is no enough capacity")
+                success = False
                 break
 
             # Sort by CP value
@@ -89,36 +90,6 @@ for t in range(100, 3000, 50):
                     bundle['chosen'] = True
                 else:
                     break
-
-            # The modified point
-            # another = max(bundle_list, key=lambda b : b['traffic'])
-
-            # if traffic_sum >= another['traffic']:
-            #     traffic = traffic - traffic_sum
-            #     for bundle in bundle_list:
-            #         if bundle['chosen'] == True:
-            #             if bundle['id'] == 'edge':
-            #                 edge.used = True
-            #             else:
-            #                 fog_set.fog_list[bundle['id']].used = True
-            #         else:
-            #             if bundle['id'] == 'edge':
-            #                 edge.clear()
-            #             else:
-            #                 fog_set.fog_list[bundle['id']].clear()
-            # else:
-            #     traffic = traffic - another['traffic']
-            #     for bundle in bundle_list:
-            #         if bundle['id'] == another['id']:
-            #             if another['id'] == 'edge':
-            #                 edge.used = True
-            #             else:
-            #                 fog_set.fog_list[another['id']].used = True
-            #         else:
-            #             if bundle['id'] == 'edge':
-            #                 edge.clear()
-            #             else:
-            #                 fog_set.fog_list[bundle['id']].clear()
             
             traffic = traffic - traffic_sum
             for bundle in bundle_list:
@@ -135,43 +106,44 @@ for t in range(100, 3000, 50):
             
             bundle_list.clear()
 
-        if cost_type == 'fixed':
-            total_cost_fixed.append(edge.edge_cost() + fog_set.fog_set_fixed_cost(25))
-            edge_cost_fixed.append(edge.edge_cost())
-            fog_cost_fixed.append(fog_set.fog_set_fixed_cost(25))
-        else:
-            # data['traffic'].append(str(t))
-            # traffic_list.append(str(t))
-            # for i, c in enumerate(collections):
-            #     if i == 0:
-            #         data[c].append(edge.max_traffic / t)
-            #     else:
-            #         if fog_set.fog_list[i - 1].max_traffic > 0:
-            #             data[c].append(fog_set.fog_list[i - 1].max_traffic / t)
+        if success:
+            if cost_type == 'fixed':
+                total_cost_fixed.append(edge.edge_cost() + fog_set.fog_set_fixed_cost(5))
+                edge_cost_fixed.append(edge.edge_cost())
+                fog_cost_fixed.append(fog_set.fog_set_fixed_cost(5))
+            else:
+            #     data['traffic'].append(str(t))
+            #     traffic_list.append(str(t))
+            #     for i, c in enumerate(collections):
+            #         if i == 0:
+            #             data[c].append(edge.max_traffic)
             #         else:
-            #             data[c].append(0)
-            # data['traffic'].append(str(t))
-            # traffic_list.append(str(t))
-            # for i, c in enumerate(collections):
-            #     if i == 0:
-            #         data[c].append(edge.active_servers)
-            #     else:
-            #         data[c].append(fog_set.fog_list[i - 1].used_vehicles)
-            traffic_list.append(t)
-            total_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
-            edge_cost.append(edge.edge_cost())
-            fog_cost.append(fog_set.fog_set_cost())
-        
-        # if algorithm_type == 'CP':
-        #     traffic_list.append(t)
-        #     CP_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
-        # elif algorithm_type == 'cost':
-        #     cost_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
-        # else:
-        #     traffic_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
-        
-        # edge.display()
-        # fog_set.display()
+            #             if fog_set.fog_list[i - 1].max_traffic > 0:
+            #                 data[c].append(fog_set.fog_list[i - 1].max_traffic)
+            #             else:
+            #                 data[c].append(0)
+                # data['traffic'].append(str(t))
+                # traffic_list.append(str(t))
+                # for i, c in enumerate(collections):
+                #     if i == 0:
+                #         data[c].append(edge.active_servers)
+                #     else:
+                #         data[c].append(fog_set.fog_list[i - 1].used_vehicles)
+                traffic_list.append(t)
+                total_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
+                edge_cost.append(edge.edge_cost())
+                fog_cost.append(fog_set.fog_set_cost())
+            
+            # if algorithm_type == 'CP':
+            #     traffic_list.append(t)
+            #     CP_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
+            # elif algorithm_type == 'cost':
+            #     cost_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
+            # else:
+            #     traffic_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
+            
+            # edge.display()
+            # fog_set.display()
 
         edge.clear()
         fog_set.clear()
@@ -179,12 +151,12 @@ for t in range(100, 3000, 50):
     
 # output to static HTML file
 # output_file("graph/traffic-cost.html")
-output_file("graph/traffic/un-cost.html")
+output_file("graph/S_fog/traffic/fixed_cost_5.html")
 
 # p = figure(x_range=traffic_list, plot_width=1600, plot_height=900, title="traffic distribution",
 #             tooltips="$name \ @$name")
 
-# p.vbar_stack(collections, x='traffic', width=0.9, color=colors, source=data,
+# p.vbar_stack(collections, x='traffic', width=0.9, line_width=0, line_color='white',fill_color=colors, source=data,
 #              legend=[value(x) for x in collections])
 
 # p.y_range.start = 0
@@ -208,9 +180,9 @@ p = figure(plot_width=1600, plot_height=840, x_axis_label='Araival Traffic', y_a
 p.line(traffic_list, total_cost, legend="total.", line_width=3)
 p.line(traffic_list, edge_cost, legend="edge.", line_width=3, line_color="dodgerblue")
 p.line(traffic_list, fog_cost, legend="fog.", line_width=3, line_color="deepskyblue")
-# p.line(traffic_list, total_cost_fixed, legend="total-fixed.", line_width=3, line_color="red")
-# p.line(traffic_list, edge_cost_fixed, legend="edge-fixed.", line_width=3, line_color="tomato")
-# p.line(traffic_list, fog_cost_fixed, legend="fog-fixed.", line_width=3, line_color="pink")
+p.line(traffic_list, total_cost_fixed, legend="total-fixed.", line_width=3, line_color="red")
+p.line(traffic_list, edge_cost_fixed, legend="edge-fixed.", line_width=3, line_color="tomato")
+p.line(traffic_list, fog_cost_fixed, legend="fog-fixed.", line_width=3, line_color="pink")
 # p.line(traffic_list, CP_cost, legend="CP.", line_width=3)
 # p.line(traffic_list, cost_cost, legend="cost.", line_width=3, line_color="#e84d60")
 # p.line(traffic_list, traffic_cost, legend="traffic.", line_width=3, line_color="lightseagreen")
@@ -219,9 +191,9 @@ p.line(traffic_list, fog_cost, legend="fog.", line_width=3, line_color="deepskyb
 p.circle(traffic_list, total_cost, size=7)
 p.circle(traffic_list, edge_cost, fill_color="dodgerblue", line_color="dodgerblue", size=7)
 p.circle(traffic_list, fog_cost, fill_color="deepskyblue", line_color="deepskyblue", size=7)
-# p.circle(traffic_list, total_cost_fixed, fill_color="red", line_color="red", size=7)
-# p.circle(traffic_list, edge_cost_fixed, fill_color="tomato", line_color="tomato", size=7)
-# p.circle(traffic_list, fog_cost_fixed, fill_color="pink", line_color="pink", size=7)
+p.circle(traffic_list, total_cost_fixed, fill_color="red", line_color="red", size=7)
+p.circle(traffic_list, edge_cost_fixed, fill_color="tomato", line_color="tomato", size=7)
+p.circle(traffic_list, fog_cost_fixed, fill_color="pink", line_color="pink", size=7)
 # p.circle(traffic_list, CP_cost, size=7)
 # p.circle(traffic_list, cost_cost, fill_color="#e84d60", line_color="#e84d60", size=7)
 # p.circle(traffic_list, traffic_cost, fill_color="lightseagreen", line_color="lightseagreen", size=7)

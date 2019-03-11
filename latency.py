@@ -142,23 +142,23 @@ for l in [x * 0.01 for x in range(1, 100, 2)]:
             #         data[c].append(edge.active_servers)
             #     else:
             #         data[c].append(fog_set.fog_list[i - 1].used_vehicles)
-            # latency_list.append('{:10.2f}'.format(l))
-            # total_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
-            # edge_cost.append(edge.edge_cost())
-            # fog_cost.append(fog_set.fog_set_cost())
+            latency_list.append('{:10.2f}'.format(l))
+            total_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
+            edge_cost.append(edge.edge_cost())
+            fog_cost.append(fog_set.fog_set_cost())
         
-        if algorithm_type == 'CP':
-            latency_list.append(l)
-            CP_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
-        elif algorithm_type == 'cost':
-            cost_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
-        else:
-            traffic_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
+        # if algorithm_type == 'CP':
+        #     latency_list.append(l)
+        #     CP_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
+        # elif algorithm_type == 'cost':
+        #     cost_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
+        # else:
+        #     traffic_cost.append(edge.edge_cost() + fog_set.fog_set_cost())
         edge.clear()
         fog_set.clear()
 
 # output to static HTML file
-output_file("graph/latency/1000-traffic-algorithm_1.html")
+output_file("graph/S_fog/latency/cost.html")
 
 # p = figure(x_range=latency_list, plot_width=1600, plot_height=900, title="500-traffic edge and fog distribution",
 #             tooltips="$name \ @$name")
@@ -185,26 +185,26 @@ p = figure(plot_width=1600, plot_height=840, x_axis_label='Max latency', y_axis_
 # p = figure(title="traffic to cost", x_axis_label='traffic', y_axis_label='cost')
 
 # add a line renderer with legend and line thickness
-# p.line(latency_list, total_cost, legend="total.", line_width=3)
-# p.line(latency_list, edge_cost, legend="edge.", line_width=3, line_color="dodgerblue")
-# p.line(latency_list, fog_cost, legend="fog.", line_width=3, line_color="deepskyblue")
+p.line(latency_list, total_cost, legend="total.", line_width=3)
+p.line(latency_list, edge_cost, legend="edge.", line_width=3, line_color="dodgerblue")
+p.line(latency_list, fog_cost, legend="fog.", line_width=3, line_color="deepskyblue")
 # p.line(latency_list, total_cost_fixed, legend="total-fixed.", line_width=3, line_color="red")
 # p.line(latency_list, edge_cost_fixed, legend="edge-fixed.", line_width=3, line_color="tomato")
 # p.line(latency_list, fog_cost_fixed, legend="fog-fixed.", line_width=3, line_color="pink")
-p.line(latency_list, CP_cost, legend="CP.", line_width=3)
-p.line(latency_list, cost_cost, legend="cost.", line_width=3, line_color="#e84d60")
-p.line(latency_list, traffic_cost, legend="traffic.", line_width=3, line_color="lightseagreen")
+# p.line(latency_list, CP_cost, legend="CP.", line_width=3)
+# p.line(latency_list, cost_cost, legend="cost.", line_width=3, line_color="#e84d60")
+# p.line(latency_list, traffic_cost, legend="traffic.", line_width=3, line_color="lightseagreen")
 
 
-# p.circle(latency_list, total_cost, size=7)
-# p.circle(latency_list, edge_cost, fill_color="dodgerblue", line_color="dodgerblue", size=7)
-# p.circle(latency_list, fog_cost, fill_color="deepskyblue", line_color="deepskyblue", size=7)
+p.circle(latency_list, total_cost, size=7)
+p.circle(latency_list, edge_cost, fill_color="dodgerblue", line_color="dodgerblue", size=7)
+p.circle(latency_list, fog_cost, fill_color="deepskyblue", line_color="deepskyblue", size=7)
 # p.circle(latency_list, total_cost_fixed, fill_color="red", line_color="red", size=7)
 # p.circle(latency_list, edge_cost_fixed, fill_color="tomato", line_color="tomato", size=7)
 # p.circle(latency_list, fog_cost_fixed, fill_color="pink", line_color="pink", size=7)
-p.circle(latency_list, CP_cost, size=7)
-p.circle(latency_list, cost_cost, fill_color="#e84d60", line_color="#e84d60", size=7)
-p.circle(latency_list, traffic_cost, fill_color="lightseagreen", line_color="lightseagreen", size=7)
+# p.circle(latency_list, CP_cost, size=7)
+# p.circle(latency_list, cost_cost, fill_color="#e84d60", line_color="#e84d60", size=7)
+# p.circle(latency_list, traffic_cost, fill_color="lightseagreen", line_color="lightseagreen", size=7)
 
 
 # show the results

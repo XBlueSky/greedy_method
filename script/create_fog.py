@@ -7,16 +7,29 @@ parser.add_argument("fog_num", help="Input number of fogs")
 parser.add_argument("cost", help="Input fixed cost number or diff")
 args = parser.parse_args()
 
-for i in range(10):
-    with open("../testcase/fog_" + args.fog_num + "_v" + str(i+1), 'w') as fp:
+for i in range(1):
+    with open("../testcase/Sfog_" + args.fog_num + "_v" + str(i+1), 'w') as fp:
 
         for i in range(int(args.fog_num)):
-            vehicle_num = random.randint(1, 100)
+            if i < 3 :
+                vehicle_num = random.randint(1, 10)
+            elif i < 6 :
+                vehicle_num = random.randint(20, 50)
+            else:
+                vehicle_num = random.randint(60, 100)
 
             # cost
             if args.cost == "diff":
                 for v in range(vehicle_num):
-                    diff_cost = random.randint(5, 50)
+                    if i == 9:
+                        diff_cost = random.randint(5, 50)
+                    elif i % 3 == 0:
+                        diff_cost = random.randint(1, 10)
+                    elif i % 3 == 1:
+                        diff_cost = random.randint(20, 30)
+                    elif i % 3 == 2:
+                        diff_cost = random.randint(40, 50)
+                        
                     fp.write(str(diff_cost) + " ")
             else:
                 for v in range(vehicle_num):
@@ -33,8 +46,12 @@ for i in range(10):
             initial_power       = []
             threshold_power     = []
             for v in range(vehicle_num):
-                initial = random.randint(30, 100)
-                threshold = random.randint(10, 50)
+                if i == 9:
+                    initial = random.randint(30, 40)
+                    threshold = random.randint(30, 35)
+                else:
+                    initial = random.randint(30, 100)
+                    threshold = random.randint(10, 50)
                 if initial < threshold:
                     initial_power.append(threshold)
                     threshold_power.append(initial)
@@ -50,6 +67,3 @@ for i in range(10):
             for v in range(vehicle_num):
                 fp.write(str(threshold_power[v]) + " ")
             fp.write("\n")
-
-
-
