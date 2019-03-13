@@ -1,13 +1,15 @@
 from fog_set.fog import Fog
+from vehicle_set.vehicle_set import Vehicle_Set
 import prettytable as pt
 
 class Fog_Set:
     fog_list            = []
-    def __init__(self, ratio, edge_transmission_rate, fog_transmission_rate, capacity, total_fogs, file_name):
+    def __init__(self, ratio, edge_transmission_rate, fog_transmission_rate, vehicle_transmission_rate, capacity, total_fogs, file_name):
         self.ratio              = ratio
         self.total_fogs         = total_fogs
-
-        vehicle_num_in_fogs = []    
+        self.fog_list       = []
+        vehicle_num_in_fogs = []
+        self.vehicle_list = Vehicle_Set(capacity, edge_transmission_rate, vehicle_transmission_rate)    
         file = open(file_name,'r')
         for i,line in enumerate(file):
             if i % 4 == 0:
@@ -22,6 +24,7 @@ class Fog_Set:
                 vehicle_num_in_fogs.append(len(cost_set))
                 self.fog_list.append( Fog(index, capacity, vehicle_num_in_fogs[index], edge_transmission_rate, fog_transmission_rate))
                 self.fog_list[index].set_vehicle_set(cost_set, consumption_rate_set, initial_power_set, threshold_power_set)
+                self.vehicle_list.append_vehicle(vehicle_num_in_fogs[index], cost_set, consumption_rate_set, initial_power_set, threshold_power_set)
         self.max_vehicles = max(vehicle_num_in_fogs)
         file.close()
 

@@ -1,5 +1,6 @@
 from m_m_c.m_m_c import m_m_c_latency
 from fog_set.vehicle import Vehicle
+import numpy as np
 
 class Fog:
     used            = False
@@ -50,9 +51,18 @@ class Fog:
     def algorithm(self, traffic, max_latency, least_error):
         
         # start from number of vehicles whose usage_time bigger equal than max_latency
-        self.vehicle_set.sort(key=lambda v : v.cost)
-        self.vehicle_set.sort(key=lambda v : v.usage_time, reverse=True)
-        used_vehicles = sum([v.used(max_latency) for v in self.vehicle_set])
+        # self.vehicle_set.sort(key=lambda v : v.cost)
+        # self.vehicle_set.sort(key=lambda v : v.usage_time, reverse=True)
+        # used_vehicles = sum([v.used(max_latency) for v in self.vehicle_set])
+        for v in self.vehicle_set:
+            v.used(max_latency)
+        self.vehicle_set.sort(key=lambda v : v.real_usage_time / v.cost, reverse=True)
+        used_vehicles = 0
+        for v in self.vehicle_set:
+            if v.real_usage_time < max_latency:
+                break
+            used_vehicles = used_vehicles + 1
+
         self.vehicle_set[0:used_vehicles].sort(key=lambda v : v.cost)
         
         # find maximum traffic

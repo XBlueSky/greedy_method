@@ -19,7 +19,7 @@ edge.set_traffic(constant.traffic)
 # Fog_Set: ratio, edge_transmission_rate, fog_transmission_rate, capacity, total_fogs, testcase file
 fogs_num = args.filename.split("_")
 file_name = "testcase/"+args.filename
-fog_set = Fog_Set(constant.ratio, 1250, 1250, 5, int(fogs_num[1]), file_name)
+fog_set = Fog_Set(constant.ratio, 1250, 1250, 125, 5, int(fogs_num[1]), file_name)
 fog_set.set_traffic(constant.traffic)
 
 # 0/1 knapsack problem with (1 − 1/ sqrt(e)) bound

@@ -1,5 +1,7 @@
 class Vehicle:
-    used_bit    = False
+    used_bit        = False
+    max_traffic     = 0
+    real_usage_time = 0
     def __init__(self, index, cost, consumption_rate, initial_power, threshold_power):
         self.index              = index
         self.cost               = cost
@@ -10,6 +12,7 @@ class Vehicle:
     
     def used(self, max_latency):
         if self.usage_time >= max_latency:
+            self.real_usage_time = max_latency
             return True
         else:
             return False
