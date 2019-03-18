@@ -8,6 +8,7 @@ verify_ssl = true
 [packages]
 ptable = "*"
 bokeh = "*"
+selenium = "*"
 
 [requires]
 python_version = "3.5"

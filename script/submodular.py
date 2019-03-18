@@ -25,8 +25,6 @@ fog_set.set_traffic(constant.traffic)
 # 0/1 knapsack problem with (1 − 1/ sqrt(e)) bound
 traffic = constant.traffic
 bundle_list = []
-empty_list = []
-algorithm = 'CP'
 
 while traffic > constant.least_error:
     # Edge and all of fog would calculate its own maximum traffic
@@ -36,49 +34,53 @@ while traffic > constant.least_error:
 
     for f in fog_set.fog_list:
         if f.used == False:
-            f.algorithm(traffic, constant.max_latency, constant.least_error, algorithm)
+            f.algorithm(traffic, constant.max_latency, constant.least_error)
             if f.max_traffic > 0:
-                bundle_list.append({'id': f.index, 'traffic': f.max_traffic, 'cost': f.fog_cost(), 'CP': f.max_traffic / cost, 'chosen': False})
-            else:
-                empty_list.append({'id': f.index, 'traffic': 0, 'cost': 0, 'CP': 0, 'chosen': False})
+                bundle_list.append({'id': f.index, 'traffic': f.max_traffic, 'cost': f.fog_cost(), 'CP': f.max_traffic / f.fog_cost(), 'chosen': False})
 
     if not bundle_list:
-        if algorithm == 'max':
-            print("There is no enough capacity")
-            break
-        else:
-            algorithm = 'max'
-            traffic = constant.traffic
-            bundle_list.clear()
-            edge.clear()
-            fog_set.clear()
-            continue
+        print("There is no enough capacity")
+        break
 
     # Sort by CP value
     bundle_list.sort(key=lambda b : b['CP'], reverse=True)
+    traffic_sum = 0
     for bundle in bundle_list:
-        if traffic - bundle['traffic'] >= 0 and bundle['traffic'] > 0:
-            traffic = traffic - bundle['traffic']
+        if traffic_sum + bundle['traffic'] <= traffic:
+            traffic_sum = traffic_sum + bundle['traffic']
             bundle['chosen'] = True
         else:
             break
-    
-    for bundle in bundle_list:
-        if bundle['chosen'] == True:
-            if bundle['id'] == 'edge':
-                edge.used = True
-            else:
-                fog_set.fog_list[bundle['id']].used = True
-        else:
-            if bundle['id'] == 'edge':
-                edge.clear()
-            else:
-                fog_set.fog_list[bundle['id']].clear()
-    
-    for empty in empty_list:
-        fog_set.fog_list[empty['id']].clear()
 
-    empty_list.clear()
+    # The modified point
+    another = max(bundle_list, key=lambda b : b['traffic'])
+
+    if traffic_sum >= another['traffic']:
+        traffic = traffic - traffic_sum
+        for bundle in bundle_list:
+            if bundle['chosen'] == True:
+                if bundle['id'] == 'edge':
+                    edge.used = True
+                else:
+                    fog_set.fog_list[bundle['id']].used = True
+            else:
+                if bundle['id'] == 'edge':
+                    edge.clear()
+                else:
+                    fog_set.fog_list[bundle['id']].clear()
+    else:
+        traffic = traffic - another['traffic']
+        for bundle in bundle_list:
+            if bundle['id'] == another['id']:
+                if another['id'] == 'edge':
+                    edge.used = True
+                else:
+                    fog_set.fog_list[another['id']].used = True
+            else:
+                if bundle['id'] == 'edge':
+                    edge.clear()
+                else:
+                    fog_set.fog_list[bundle['id']].clear()
     bundle_list.clear()
 
 edge.display()

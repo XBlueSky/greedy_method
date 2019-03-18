@@ -12,7 +12,7 @@
 # 10               Maximum servers in edge                        #
 ############################    Fog    ############################
 # 1250  (10 Gbps)  Transmission rate of vehicles (MB/s)           #
-# 5                Capacity of vehicles (MB/s)                    #
+# 5                Capacity of each vehicle (MB/s)                #
 # 2                Number of fogs                                 #
 # 3 5              Number of vehicles in fog                      #
 ############################   Fog 1   ############################

@@ -3,6 +3,7 @@ from fog_set.fog_set import Fog_Set
 from constant.constant import Constant
 from bokeh.plotting import figure, output_file, show, ColumnDataSource
 from bokeh.core.properties import value
+from bokeh.io import export_svgs
 import random
 from argparse import ArgumentParser
 
@@ -45,7 +46,7 @@ for i in range(10):
     # fogs_num = args.filename.split("_")
     # file_name = "testcase/"+args.filename
     # fog_set = Fog_Set(constant.ratio, 1250, 1250, 125, 5, int(fogs_num[1]), file_name)
-    fog_set = Fog_Set(constant.ratio, 1250, 1250, 125, 5, 10, "testcase/Efog_10_v" + str(i+1))
+    fog_set = Fog_Set(constant.ratio, 1250, 1250, 125, 5, 10, "testcase/Sfog_10_v" + str(i+1))
 
     # collections = ["edge_10"]
     # colors      = ['#0D3331', 'darkslategray', "#75968f", "#a5bab7", "#c9d9d3", "#e2e2e2", "#dfccce", "#ddb7b1", "#cc7878", "#933b41", "#550b1d"]
@@ -68,7 +69,8 @@ for i in range(10):
                 success = True
                 traffic = t
                 bundle_list = []
-
+                empty_list = []
+                algorithm = 'CP'
                 if architecture == 2:            
                     edge.algorithm(traffic, constant.max_latency, constant.least_error)
                     bundle_list.append({'id': 'edge', 'traffic': edge.max_traffic, 'cost': edge.edge_cost(), 'CP': edge.max_traffic / edge.edge_cost(), 'chosen': False})
@@ -124,18 +126,30 @@ for i in range(10):
 
                         for f in fog_set.fog_list:
                             if f.used == False:
-                                f.algorithm(traffic, constant.max_latency, constant.least_error)
+                                f.algorithm(traffic, constant.max_latency, constant.least_error, 'diff', algorithm)
                                 if cost_type == 'fixed':
                                     cost = f.fog_fixed_cost(10)
                                 else:
                                     cost = f.fog_cost()
                                 # cost = f.fog_cost()
-                                bundle_list.append({'id': f.index, 'traffic': f.max_traffic, 'cost': cost, 'CP': f.max_traffic / cost, 'chosen': False})
+                                if f.max_traffic > 0:
+                                    bundle_list.append({'id': f.index, 'traffic': f.max_traffic, 'cost': cost, 'CP': f.max_traffic / cost, 'chosen': False})
+                                else:
+                                    empty_list.append({'id': f.index, 'traffic': 0, 'cost': 0, 'CP': 0, 'chosen': False})
 
                         if not bundle_list:
-                            # print("There is no enough capacity")
-                            # success = False
-                            break
+                            if algorithm == 'max':
+                                print("There is no enough capacity")
+                            #     success = False
+                                break
+                            else:
+                                print("change", t)
+                                algorithm = 'max'
+                                traffic = t
+                                bundle_list.clear()
+                                edge.clear()
+                                fog_set.clear()
+                                continue
 
                         # Sort by CP value
                         # if algorithm_type == 'CP':
@@ -165,7 +179,10 @@ for i in range(10):
                                     edge.clear()
                                 else:
                                     fog_set.fog_list[bundle['id']].clear()
-                        
+                        for empty in empty_list:
+                            fog_set.fog_list[empty['id']].clear()
+                
+                        empty_list.clear()
                         bundle_list.clear()
 
                 if success:
@@ -250,7 +267,7 @@ for index in range(len(total_cost)):
     
 # output to static HTML file
 # output_file("graph/traffic-cost.html")
-output_file("graph/E_fog/architecture/try.html")
+# output_file("graph/S_fog/architecture/cost.html")
 
 # p = figure(x_range=traffic_list, plot_width=1600, plot_height=900, title="traffic distribution",
 #             tooltips="$name \ @$name")
@@ -273,32 +290,36 @@ TOOLTIPS = [
     ]
 
 # create a new plot with a title and axis labels
-p = figure(plot_width=1600, plot_height=840, x_axis_label='Araival Traffic', y_axis_label='Cost', tooltips=TOOLTIPS)
+p = figure(plot_width=750, plot_height=500, x_axis_label='Araival Traffic', y_axis_label='Cost', tooltips=TOOLTIPS)
 
 # add a line renderer with legend and line thickness
 
-p.line(traffic_list, totalCost_2, legend="total-2.", line_width=3, line_color="red")
-p.line(traffic_list, edgeCost_2, legend="edge-2.", line_width=3, line_color="tomato")
-p.line(traffic_list, fogCost_2, legend="fog-2.", line_width=3, line_color="pink")
-p.line(traffic_list, totalCost, legend="total.", line_width=3)
-p.line(traffic_list, edgeCost, legend="edge.", line_width=3, line_color="dodgerblue")
-p.line(traffic_list, fogCost, legend="fog.", line_width=3, line_color="deepskyblue")
+p.line(traffic_list, totalCost, legend="Total.", line_width=2)
+p.line(traffic_list, edgeCost, legend="Edge.", line_width=2, line_color="dodgerblue")
+p.line(traffic_list, fogCost, legend="Fog.", line_width=2, line_color="deepskyblue")
+p.line(traffic_list, totalCost_2, legend="Total Two-tier.", line_width=2, line_color="red", line_dash="4 4")
+p.line(traffic_list, edgeCost_2, legend="Edge Two-tier.", line_width=2, line_color="tomato", line_dash="4 4")
+p.line(traffic_list, fogCost_2, legend="Fog Two-tier.", line_width=2, line_color="orange", line_dash="4 4")
 # p.line(traffic_list, CP_cost, legend="CP.", line_width=3)
 # p.line(traffic_list, cost_cost, legend="cost.", line_width=3, line_color="#e84d60")
 # p.line(traffic_list, traffic_cost, legend="traffic.", line_width=3, line_color="lightseagreen")
 
-p.circle(traffic_list, totalCost_2, fill_color="red", line_color="red", size=7)
-p.circle(traffic_list, edgeCost_2, fill_color="tomato", line_color="tomato", size=7)
-p.circle(traffic_list, fogCost_2, fill_color="pink", line_color="pink", size=7)
-p.circle(traffic_list, totalCost, size=7)
-p.circle(traffic_list, edgeCost, fill_color="dodgerblue", line_color="dodgerblue", size=7)
-p.circle(traffic_list, fogCost, fill_color="deepskyblue", line_color="deepskyblue", size=7)
+# p.circle(traffic_list, totalCost_2, fill_color="red", line_color="red", size=7)
+# p.circle(traffic_list, edgeCost_2, fill_color="tomato", line_color="tomato", size=7)
+# p.circle(traffic_list, fogCost_2, fill_color="pink", line_color="pink", size=7)
+# p.circle(traffic_list, totalCost, size=7)
+# p.circle(traffic_list, edgeCost, fill_color="dodgerblue", line_color="dodgerblue", size=7)
+# p.circle(traffic_list, fogCost, fill_color="deepskyblue", line_color="deepskyblue", size=7)
 # p.circle(traffic_list, CP_cost, size=7)
 # p.circle(traffic_list, cost_cost, fill_color="#e84d60", line_color="#e84d60", size=7)
 # p.circle(traffic_list, traffic_cost, fill_color="lightseagreen", line_color="lightseagreen", size=7)
 
-
+p.xaxis.axis_label_text_font_size = "12pt"
+p.yaxis.axis_label_text_font_size = "12pt"
+p.legend.location = "top_left"
 # show the results
-show(p)
+# show(p)
+p.output_backend = "svg"
+export_svgs(p, filename="graph/S_fog/architecture/cost.svg")
 
 

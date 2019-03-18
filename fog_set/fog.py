@@ -48,22 +48,30 @@ class Fog:
             f.used_bit = False
 
     # offloading computation from edge to fog
-    def algorithm(self, traffic, max_latency, least_error):
+    def algorithm(self, traffic, max_latency, least_error, cost_type, algorithm_type):
         
         # start from number of vehicles whose usage_time bigger equal than max_latency
-        # self.vehicle_set.sort(key=lambda v : v.cost)
-        # self.vehicle_set.sort(key=lambda v : v.usage_time, reverse=True)
-        # used_vehicles = sum([v.used(max_latency) for v in self.vehicle_set])
-        for v in self.vehicle_set:
-            v.used(max_latency)
-        self.vehicle_set.sort(key=lambda v : v.real_usage_time / v.cost, reverse=True)
-        used_vehicles = 0
-        for v in self.vehicle_set:
-            if v.real_usage_time < max_latency:
-                break
-            used_vehicles = used_vehicles + 1
-
-        self.vehicle_set[0:used_vehicles].sort(key=lambda v : v.cost)
+        if algorithm_type == 'max':
+            self.vehicle_set.sort(key=lambda v : v.cost)
+            self.vehicle_set.sort(key=lambda v : v.usage_time, reverse=True)
+            used_vehicles = sum([v.used(max_latency) for v in self.vehicle_set])
+        else:
+            for v in self.vehicle_set:
+                v.used(max_latency)
+            if cost_type == 'diff':
+                # self.vehicle_set.sort(key=lambda v : v.real_usage_time, reverse=True)
+                self.vehicle_set.sort(key=lambda v : v.real_usage_time / v.cost, reverse=True)
+            else:
+                self.vehicle_set.sort(key=lambda v : v.real_usage_time / cost_type, reverse=True)
+            
+            used_vehicles = 0
+            for v in self.vehicle_set:
+                if v.real_usage_time < max_latency:
+                    break
+                used_vehicles = used_vehicles + 1
+        
+        if cost_type == 'diff':
+            self.vehicle_set[0:used_vehicles].sort(key=lambda v : v.cost)
         
         # find maximum traffic
         # check arrival traffic is larger than the traffic that can be handle in edge
@@ -72,12 +80,12 @@ class Fog:
         if total_latency > max_latency:
 
             # find least traffic by bisection method variation
-            self.max_traffic = self.bisection_method(traffic, used_vehicles, max_latency, least_error)
+            self.max_traffic = self.bisection_method(traffic, used_vehicles, max_latency, least_error, max_latency)
 
             # find maximum traffic from least traffic plus one by one
             for vehicles_num in range(used_vehicles + 1, self.total_vehicles + 1):
 
-                test_traffic = self.bisection_method(traffic, vehicles_num, self.vehicle_set[vehicles_num - 1].usage_time, least_error)
+                test_traffic = self.bisection_method(traffic, vehicles_num, max_latency, least_error, self.vehicle_set[vehicles_num - 1].usage_time)
                 if test_traffic > self.max_traffic:
                     self.max_traffic = test_traffic
                     used_vehicles = vehicles_num
@@ -101,16 +109,17 @@ class Fog:
         communication_latency = self.edge_communication_latency(self.max_traffic) + self.fog_communication_latency(self.max_traffic)
         self.latency = communication_latency + self.computation_latency(self.max_traffic, self.used_vehicles)
 
-    def bisection_method(self, traffic, used_vehicles, max_latency, least_error):
+    def bisection_method(self, traffic, used_vehicles, max_latency, least_error, usage_time):
         lower   = 0
         upper   = traffic
         flag    = False
 
         while (lower + least_error) <= upper:
             mid = (lower + upper) / 2
-            total_latency = self.edge_communication_latency(mid) + self.computation_latency(mid, used_vehicles) + self.fog_communication_latency(mid)
+            computation_latency = self.computation_latency(mid, used_vehicles)
+            total_latency = self.edge_communication_latency(mid) + computation_latency + self.fog_communication_latency(mid)
 
-            if total_latency <= max_latency:
+            if total_latency <= max_latency and computation_latency <= usage_time:
                 flag    = True
                 lower   = mid
             else:

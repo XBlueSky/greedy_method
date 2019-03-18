@@ -3,6 +3,7 @@ from fog_set.fog_set import Fog_Set
 from constant.constant import Constant
 from bokeh.plotting import figure, output_file, show, ColumnDataSource
 from bokeh.core.properties import value
+from bokeh.io import export_svgs
 import random
 from argparse import ArgumentParser
 
@@ -29,12 +30,12 @@ fog_cost_list       = []
 # Initial
 
 # Constant: traffic, ratio, max_latency, least_error
-constant = Constant(2500, 0.01, 1, 1)
+constant = Constant(1500, 0.01, 1, 1)
 
 # Edge: capacity, max_servers, cost
 edge = Edge(200, 5, 200)
 
-for i in range(1):
+for i in range(10):
     total_cost          = []
     edge_cost           = []
     fog_cost            = []
@@ -45,9 +46,8 @@ for i in range(1):
     # fog_set = Fog_Set(constant.ratio, 1250, 1250, 125, 5, int(fogs_num[1]), file_name)
     fog_set = Fog_Set(constant.ratio, 1250, 1250, 125, 5, 10, "testcase/Sfog_10_v" + str(i+1))
 
-    for l in [x * 0.01 for x in range(0, 200, 5)]:
+    for l in [x * 0.01 for x in range(5, 200, 5)]:
     # for l in [x * 0.1 for x in range(0, 100, 1)]:
-        
         success = True
         # for cost_type in ['fixed', 'diff']:
         for cost_type in ['diff']:
@@ -56,7 +56,8 @@ for i in range(1):
             traffic = constant.traffic
             latency = l
             bundle_list = []
-
+            empty_list = []
+            algorithm = 'CP'
             while traffic > constant.least_error:
                 # Edge and all of fog would calculate its own maximum traffic
                 if edge.used == False:
@@ -65,18 +66,30 @@ for i in range(1):
 
                 for f in fog_set.fog_list:
                     if f.used == False:
-                        f.algorithm(traffic, latency, constant.least_error)
+                        f.algorithm(traffic, latency, constant.least_error, 'diff', algorithm)
                         if cost_type == 'fixed':
                             cost = f.fog_fixed_cost(10)
                         else:
                             cost = f.fog_cost()
                         # cost = f.fog_cost()
-                        bundle_list.append({'id': f.index, 'traffic': f.max_traffic, 'cost': cost, 'CP': f.max_traffic / cost, 'chosen': False})
-
+                        if f.max_traffic > 0:
+                            bundle_list.append({'id': f.index, 'traffic': f.max_traffic, 'cost': cost, 'CP': f.max_traffic / cost, 'chosen': False})
+                        else:
+                            empty_list.append({'id': f.index, 'traffic': 0, 'cost': 0, 'CP': 0, 'chosen': False})
+                        
                 if not bundle_list:
-                    # print("There is no enough capacity")
-                    # success = False
-                    break
+                    if algorithm == 'max':
+                        print("There is no enough capacity")
+                    #     success = False
+                        break
+                    else:
+                        print("change", l)
+                        algorithm = 'max'
+                        traffic = constant.traffic
+                        bundle_list.clear()
+                        edge.clear()
+                        fog_set.clear()
+                        continue
 
                 # Sort by CP value
                 # if algorithm_type == 'CP':
@@ -86,44 +99,31 @@ for i in range(1):
                 # else:
                 #     bundle_list.sort(key=lambda b : b['traffic'], reverse=True)
                 bundle_list.sort(key=lambda b : b['CP'], reverse=True)
-                traffic_sum = 0
                 for bundle in bundle_list:
-                    if traffic_sum + bundle['traffic'] <= traffic:
-                        traffic_sum = traffic_sum + bundle['traffic']
+                    if traffic - bundle['traffic'] >= 0 and bundle['traffic'] > 0:
+                        traffic = traffic - bundle['traffic']
                         bundle['chosen'] = True
                     else:
                         break
 
-                # The modified point
-                another = max(bundle_list, key=lambda b : b['traffic'])
+                for bundle in bundle_list:
+                    if bundle['chosen'] == True:
+                        if bundle['id'] == 'edge':
+                            edge.used = True
+                        else:
+                            fog_set.fog_list[bundle['id']].used = True
+                    else:
+                        if bundle['id'] == 'edge':
+                            edge.clear()
+                        else:
+                            fog_set.fog_list[bundle['id']].clear()
 
-                if traffic_sum >= another['traffic']:
-                    traffic = traffic - traffic_sum
-                    for bundle in bundle_list:
-                        if bundle['chosen'] == True:
-                            if bundle['id'] == 'edge':
-                                edge.used = True
-                            else:
-                                fog_set.fog_list[bundle['id']].used = True
-                        else:
-                            if bundle['id'] == 'edge':
-                                edge.clear()
-                            else:
-                                fog_set.fog_list[bundle['id']].clear()
-                else:
-                    traffic = traffic - another['traffic']
-                    for bundle in bundle_list:
-                        if bundle['id'] == another['id']:
-                            if another['id'] == 'edge':
-                                edge.used = True
-                            else:
-                                fog_set.fog_list[another['id']].used = True
-                        else:
-                            if bundle['id'] == 'edge':
-                                edge.clear()
-                            else:
-                                fog_set.fog_list[bundle['id']].clear()
+                for empty in empty_list:
+                    fog_set.fog_list[empty['id']].clear()
+                
+                empty_list.clear()
                 bundle_list.clear()
+                
             
             if success:
                 if cost_type == 'fixed':
@@ -179,7 +179,7 @@ for index in range(len(total_cost)):
     fogCost.append(sum([ c[index] for c in fog_cost_list]) / len(total_cost_list))
 
 # output to static HTML file
-output_file("graph/S_fog/latency/cost_2500.html")
+# output_file("graph/S_fog/latency/cost_2000.html")
 
 # p = figure(x_range=latency_list, plot_width=1600, plot_height=900, title="500-traffic edge and fog distribution",
 #             tooltips="$name \ @$name")
@@ -202,13 +202,13 @@ TOOLTIPS = [
     ]
 
 # create a new plot with a title and axis labels
-p = figure(plot_width=1600, plot_height=840, x_axis_label='Max latency', y_axis_label='Cost', tooltips=TOOLTIPS)
+p = figure(plot_width=750, plot_height=500, x_axis_label='Max latency', y_axis_label='Cost', tooltips=TOOLTIPS)
 # p = figure(title="traffic to cost", x_axis_label='traffic', y_axis_label='cost')
 
 # add a line renderer with legend and line thickness
-p.line(latency_list, totalCost, legend="total.", line_width=3)
-p.line(latency_list, edgeCost, legend="edge.", line_width=3, line_color="dodgerblue")
-p.line(latency_list, fogCost, legend="fog.", line_width=3, line_color="deepskyblue")
+p.line(latency_list, totalCost, legend="Total.", line_width=2)
+p.line(latency_list, edgeCost, legend="Edge.", line_width=2, line_color="dodgerblue", line_dash="4 4")
+p.line(latency_list, fogCost, legend="Fog.", line_width=2, line_color="deepskyblue", line_dash="4 4")
 # p.line(latency_list, total_cost_fixed, legend="total-fixed.", line_width=3, line_color="red")
 # p.line(latency_list, edge_cost_fixed, legend="edge-fixed.", line_width=3, line_color="tomato")
 # p.line(latency_list, fog_cost_fixed, legend="fog-fixed.", line_width=3, line_color="pink")
@@ -217,9 +217,9 @@ p.line(latency_list, fogCost, legend="fog.", line_width=3, line_color="deepskybl
 # p.line(latency_list, traffic_cost, legend="traffic.", line_width=3, line_color="lightseagreen")
 
 
-p.circle(latency_list, totalCost, size=7)
-p.circle(latency_list, edgeCost, fill_color="dodgerblue", line_color="dodgerblue", size=7)
-p.circle(latency_list, fogCost, fill_color="deepskyblue", line_color="deepskyblue", size=7)
+# p.circle(latency_list, totalCost, size=7)
+# p.circle(latency_list, edgeCost, fill_color="dodgerblue", line_color="dodgerblue", size=7)
+# p.circle(latency_list, fogCost, fill_color="deepskyblue", line_color="deepskyblue", size=7)
 # p.circle(latency_list, total_cost_fixed, fill_color="red", line_color="red", size=7)
 # p.circle(latency_list, edge_cost_fixed, fill_color="tomato", line_color="tomato", size=7)
 # p.circle(latency_list, fog_cost_fixed, fill_color="pink", line_color="pink", size=7)
@@ -228,8 +228,13 @@ p.circle(latency_list, fogCost, fill_color="deepskyblue", line_color="deepskyblu
 # p.circle(latency_list, traffic_cost, fill_color="lightseagreen", line_color="lightseagreen", size=7)
 
 
+p.xaxis.axis_label_text_font_size = "12pt"
+p.yaxis.axis_label_text_font_size = "12pt"
+# p.legend.location = "top_left"
 # show the results
-show(p)
+# show(p)
+p.output_backend = "svg"
+export_svgs(p, filename="graph/S_fog/latency/cost_1500.svg")
 
 
 # edge.display()
