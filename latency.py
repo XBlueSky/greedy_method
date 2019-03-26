@@ -202,13 +202,13 @@ TOOLTIPS = [
     ]
 
 # create a new plot with a title and axis labels
-p = figure(plot_width=750, plot_height=500, x_axis_label='Max latency', y_axis_label='Cost', tooltips=TOOLTIPS)
+p = figure(plot_width=600, plot_height=400, x_axis_label='Max latency', y_axis_label='Cost', tooltips=TOOLTIPS)
 # p = figure(title="traffic to cost", x_axis_label='traffic', y_axis_label='cost')
 
 # add a line renderer with legend and line thickness
-p.line(latency_list, totalCost, legend="Total.", line_width=2)
-p.line(latency_list, edgeCost, legend="Edge.", line_width=2, line_color="dodgerblue", line_dash="4 4")
-p.line(latency_list, fogCost, legend="Fog.", line_width=2, line_color="deepskyblue", line_dash="4 4")
+p.line(latency_list, totalCost, legend="Total Cost", line_width=4, line_dash='solid')
+p.line(latency_list, edgeCost, legend="Edge Cost", line_width=4, line_color="dodgerblue", line_dash='dotted')
+p.line(latency_list, fogCost, legend="Fog Cost", line_width=4, line_color="deepskyblue", line_dash="dashdot")
 # p.line(latency_list, total_cost_fixed, legend="total-fixed.", line_width=3, line_color="red")
 # p.line(latency_list, edge_cost_fixed, legend="edge-fixed.", line_width=3, line_color="tomato")
 # p.line(latency_list, fog_cost_fixed, legend="fog-fixed.", line_width=3, line_color="pink")
@@ -217,9 +217,9 @@ p.line(latency_list, fogCost, legend="Fog.", line_width=2, line_color="deepskybl
 # p.line(latency_list, traffic_cost, legend="traffic.", line_width=3, line_color="lightseagreen")
 
 
-p.circle(latency_list, totalCost, size=7)
-p.triangle(latency_list, edgeCost, fill_color="dodgerblue", line_color="dodgerblue", size=7)
-p.square(latency_list, fogCost, fill_color="deepskyblue", line_color="deepskyblue", size=7)
+# p.circle(latency_list, totalCost, size=7)
+# p.triangle(latency_list, edgeCost, fill_color="dodgerblue", line_color="dodgerblue", size=7)
+# p.square(latency_list, fogCost, fill_color="deepskyblue", line_color="deepskyblue", size=7)
 # p.circle(latency_list, total_cost_fixed, fill_color="red", line_color="red", size=7)
 # p.circle(latency_list, edge_cost_fixed, fill_color="tomato", line_color="tomato", size=7)
 # p.circle(latency_list, fog_cost_fixed, fill_color="pink", line_color="pink", size=7)
@@ -230,11 +230,13 @@ p.square(latency_list, fogCost, fill_color="deepskyblue", line_color="deepskyblu
 
 p.xaxis.axis_label_text_font_size = "15pt"
 p.yaxis.axis_label_text_font_size = "15pt"
+p.xaxis.major_label_text_font_size = "12pt"
+p.yaxis.major_label_text_font_size = "12pt"
 # p.legend.location = "top_left"
 # show the results
 # show(p)
 p.output_backend = "svg"
-export_svgs(p, filename="graph/S_fog/latency/test_1500.svg")
+export_svgs(p, filename="graph/S_fog/latency/cost_1500.svg")
 
 
 # edge.display()
