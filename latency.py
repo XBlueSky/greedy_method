@@ -30,7 +30,7 @@ fog_cost_list       = []
 # Initial
 
 # Constant: traffic, ratio, max_latency, least_error
-constant = Constant(1500, 0.01, 1, 1)
+constant = Constant(100, 0.01, 1, 1)
 
 # Edge: capacity, max_servers, cost
 edge = Edge(200, 5, 200)
@@ -202,7 +202,7 @@ TOOLTIPS = [
     ]
 
 # create a new plot with a title and axis labels
-p = figure(plot_width=600, plot_height=400, x_axis_label='Max latency', y_axis_label='Cost', tooltips=TOOLTIPS)
+p = figure(plot_width=600, plot_height=400, x_axis_label='Max latency(sec)', y_axis_label='Cost($)', tooltips=TOOLTIPS)
 # p = figure(title="traffic to cost", x_axis_label='traffic', y_axis_label='cost')
 
 # add a line renderer with legend and line thickness
@@ -236,7 +236,7 @@ p.yaxis.major_label_text_font_size = "12pt"
 # show the results
 # show(p)
 p.output_backend = "svg"
-export_svgs(p, filename="graph/S_fog/latency/cost_1500.svg")
+export_svgs(p, filename="graph/S_fog/latency/cost_100.svg")
 
 
 # edge.display()

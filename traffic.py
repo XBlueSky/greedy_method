@@ -42,6 +42,7 @@ for capacity in [0, 1]:
         edge = Edge(1000, 1, 1000)
 
     for i in range(10):
+        print(str(capacity) + "-" + str(i))
         total_cost          = []
         edge_cost           = []
         fog_cost            = []
@@ -61,7 +62,7 @@ for capacity in [0, 1]:
         # fogs_num = args.filename.split("_")
         # file_name = "testcase/"+args.filename
         # fog_set = Fog_Set(constant.ratio, 1250, 1250, 125, 5, int(fogs_num[1]), file_name)
-        fog_set = Fog_Set(constant.ratio, 1250, 1250, 125, 5, 10, "testcase/Sfog_10_v" + str(i+1))
+        fog_set = Fog_Set(constant.ratio, 1250, 1250, 125, 5, 10, "testcase/fog_10_v" + str(i+1))
 
         collections = ["edge_10"]
         colors      = ['#0D3331', 'darkslategray', "#75968f", "#a5bab7", "#c9d9d3", "#e2e2e2", "#dfccce", "#ddb7b1", "#cc7878", "#933b41", "#550b1d"]
@@ -70,7 +71,7 @@ for capacity in [0, 1]:
         data = dict((c,[]) for c in collections)
         data['traffic'] = []
 
-        for t in range(0, 2100, 100):
+        for t in range(0, 1050, 50):
             
             # edge.set_traffic(t)
             # fog_set.set_traffic(t)
@@ -300,12 +301,12 @@ p = figure(plot_width=600, plot_height=400, x_axis_label='Araival Traffic (mb/s)
 # p.line(traffic_list, totalCost, legend="Total Cost", line_width=4, line_dash='solid')
 # p.line(traffic_list, edgeCost, legend="Edge Cost", line_width=3, line_color="dodgerblue", line_dash='dotted')
 # p.line(traffic_list, fogCost, legend="Fog Cost", line_width=3, line_color="deepskyblue", line_dash="dashdot")
-p.line(traffic_list, totalCost, legend="Total Cost multi-servers", line_width=4, line_dash='solid')
-p.line(traffic_list, edgeCost, legend="Edge Cost multi-servers", line_width=2, line_color="dodgerblue", line_dash='solid')
-p.line(traffic_list, fogCost, legend="Fog Cost multi-servers", line_width=2, line_color="deepskyblue", line_dash="dashdot")
-p.line(traffic_list, totalCostD, legend="Total Cost single server", line_width=2, line_color="red")
-p.line(traffic_list, edgeCostD, legend="Edge Cost single server", line_width=1, line_color="tomato")
-p.line(traffic_list, fogCostD, legend="Fog Cost single server", line_width=1, line_color="orange")
+p.line(traffic_list, totalCost, legend="Total Cost by MSE", line_width=4, line_dash='solid')
+p.line(traffic_list, edgeCost, legend="Edge Cost by MSE", line_width=2, line_color="dodgerblue", line_dash='solid')
+p.line(traffic_list, fogCost, legend="Fog Cost by MSE", line_width=2, line_color="deepskyblue", line_dash="dashdot")
+p.line(traffic_list, totalCostD, legend="Total Cost by SSE", line_width=2, line_color="red")
+p.line(traffic_list, edgeCostD, legend="Edge Cost by SSE", line_width=1, line_color="tomato")
+p.line(traffic_list, fogCostD, legend="Fog Cost by SSE", line_width=1, line_color="orange")
 
 # p.line(traffic_list, totalCostFixed, legend="Total Cost", line_width=4, line_color="red", line_dash='solid')
 # p.line(traffic_list, edgeCostFixed, legend="Edge Cost", line_width=2, line_color="tomato")
@@ -319,9 +320,9 @@ p.line(traffic_list, fogCostD, legend="Fog Cost single server", line_width=1, li
 # p.circle(traffic_list, totalCost, size=7)
 # p.circle(traffic_list, edgeCost, fill_color="dodgerblue", line_color="dodgerblue", size=7)
 # p.circle(traffic_list, fogCost, fill_color="deepskyblue", line_color="deepskyblue", size=7)
-p.circle(traffic_list, totalCostD, legend="Total Cost single server", fill_color="red", line_color="red", size=7)
-p.x(traffic_list, edgeCostD, legend="Edge Cost single server", line_color="tomato", size=5)
-p.circle(traffic_list, fogCostD, legend="Fog Cost single server", fill_color="white", line_color="orange", size=5)
+p.circle(traffic_list, totalCostD, legend="Total Cost by SSE", fill_color="red", line_color="red", size=7)
+p.x(traffic_list, edgeCostD, legend="Edge Cost by SSE", line_color="tomato", size=5)
+p.circle(traffic_list, fogCostD, legend="Fog Cost by SSE", fill_color="white", line_color="orange", size=5)
 # p.circle(traffic_list, totalCostFixed, fill_color="red", line_color="red", size=7)
 # p.x(traffic_list, edgeCostFixed, legend="Edge Cost", line_color="tomato", size=5)
 # p.circle(traffic_list, fogCostFixed, legend="Fog Cost", fill_color="white", line_color="orange", size=5)
@@ -338,4 +339,4 @@ p.legend.location = "top_left"
 # show the results
 # show(p)
 p.output_backend = "svg"
-export_svgs(p, filename="graph/S_fog/traffic/d.svg")
+export_svgs(p, filename="graph/S_fog/traffic/n_10.svg")

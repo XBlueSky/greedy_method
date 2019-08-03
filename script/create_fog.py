@@ -7,30 +7,30 @@ parser.add_argument("fog_num", help="Input number of fogs")
 parser.add_argument("cost", help="Input fixed cost number or diff")
 args = parser.parse_args()
 
-for i in range(10):
-    with open("../testcase/fog_" + args.fog_num + "_v" + str(i+1), 'w') as fp:
+for j in range(100):
+    with open("../testcase/New_fog_" + args.fog_num + "_v" + str(j+1), 'w') as fp:
 
         for i in range(int(args.fog_num)):
-            # if i < 3 :
-            #     vehicle_num = random.randint(1, 10)
-            # elif i < 6 :
-            #     vehicle_num = random.randint(20, 50)
-            # else:
-            #     vehicle_num = random.randint(60, 100)
-            vehicle_num = random.randint(1, 100)
+            if i < 3 :
+                vehicle_num = random.randint(1, 10)
+            elif i < 6 :
+                vehicle_num = random.randint(20, 50)
+            else:
+                vehicle_num = random.randint(60, 100)
+            # vehicle_num = random.randint(1, 100)
 
             # cost
             if args.cost == "diff":
                 for v in range(vehicle_num):
-                    # if i == 9:
-                    #     diff_cost = random.randint(5, 50)
-                    # elif i % 3 == 0:
-                    #     diff_cost = random.randint(1, 10)
-                    # elif i % 3 == 1:
-                    #     diff_cost = random.randint(20, 30)
-                    # elif i % 3 == 2:
-                    #     diff_cost = random.randint(40, 50)
-                    diff_cost = random.randint(1, 50)
+                    if i == 9:
+                        diff_cost = random.randint(5, 50)
+                    elif i % 3 == 0:
+                        diff_cost = random.randint(1, 10)
+                    elif i % 3 == 1:
+                        diff_cost = random.randint(20, 30)
+                    elif i % 3 == 2:
+                        diff_cost = random.randint(40, 50)
+                    # diff_cost = random.randint(1, 50)
                         
                     fp.write(str(diff_cost) + " ")
             else:
@@ -40,8 +40,8 @@ for i in range(10):
 
             # consumptoin rate
             for v in range(vehicle_num):
-                consumption_rate = random.randint(1, 9)
-                # consumption_rate = 5
+                # consumption_rate = random.randint(1, 9)
+                consumption_rate = 5
                 fp.write(str(consumption_rate) + " ")
             fp.write("\n")
 
