@@ -27,12 +27,14 @@ fog_cost_list       = []
 total_cost_list_2   = []
 edge_cost_list_2    = []
 fog_cost_list_2     = []
+fixed_cost = 10
 # Initial
 
 # Constant: traffic, ratio, max_latency, least_error
 constant = Constant(500, 0.01, 1, 1)
 
 # Edge: capacity, max_servers, cost
+# edge = Edge(200, 5, 200)
 edge = Edge(200, 5, 200)
 
 for i in range(10):
@@ -118,18 +120,22 @@ for i in range(10):
                     #     break
                 
                 else:
+                    count = 0
                     while traffic > constant.least_error:
                         # Edge and all of fog would calculate its own maximum traffic
                         if edge.used == False:
                             edge.algorithm(traffic, constant.max_latency, constant.least_error)
                             bundle_list.append({'id': 'edge', 'traffic': edge.max_traffic, 'cost': edge.edge_cost(), 'CP': edge.max_traffic / edge.edge_cost(), 'chosen': False})
-
+                            if count == 0:
+                                magic_traffic = edge.max_traffic
+                                magic_cost = edge.edge_cost()
                         for f in fog_set.fog_list:
                             if f.used == False:
-                                f.algorithm(traffic, constant.max_latency, constant.least_error, 'diff', algorithm)
                                 if cost_type == 'fixed':
-                                    cost = f.fog_fixed_cost(10)
+                                    f.algorithm(traffic, constant.max_latency, constant.least_error, fixed_cost, algorithm)
+                                    cost = f.fog_fixed_cost(fixed_cost)
                                 else:
+                                    f.algorithm(traffic, constant.max_latency, constant.least_error, 'diff', algorithm)
                                     cost = f.fog_cost()
                                 # cost = f.fog_cost()
                                 if f.max_traffic > 0:
@@ -184,13 +190,23 @@ for i in range(10):
                 
                         empty_list.clear()
                         bundle_list.clear()
+                        count = count + 1
+
+                    # last compare between edge and vehicular-fogs
+                    if t > 0:
+                        current_cost = edge.edge_cost() + fog_set.fog_set_cost()
+                        if magic_traffic >= t:
+                            if magic_cost <= current_cost:
+                                edge.algorithm(t, constant.max_latency, constant.least_error)
+                                edge.used = True
+                                fog_set.clear()
 
                 if success:
                     if architecture == 2:
                         if cost_type == 'fixed':
-                            total_cost_2.append(edge.edge_cost() + fog_set.vehicle_list.total_vehicle_fixed_cost(10))
+                            total_cost_2.append(edge.edge_cost() + fog_set.vehicle_list.total_vehicle_fixed_cost(fixed_cost))
                             edge_cost_2.append(edge.edge_cost())
-                            fog_cost_2.append(fog_set.vehicle_list.total_vehicle_fixed_cost(10))
+                            fog_cost_2.append(fog_set.vehicle_list.total_vehicle_fixed_cost(fixed_cost))
                         else:
                             total_cost_2.append(edge.edge_cost() + fog_set.vehicle_list.total_vehicle_cost())
                             edge_cost_2.append(edge.edge_cost())
@@ -217,9 +233,9 @@ for i in range(10):
                         if cost_type == 'fixed':
                             if i == 0:
                                 traffic_list.append(t)
-                            total_cost.append(edge.edge_cost() + fog_set.fog_set_fixed_cost(10))
+                            total_cost.append(edge.edge_cost() + fog_set.fog_set_fixed_cost(fixed_cost))
                             edge_cost.append(edge.edge_cost())
-                            fog_cost.append(fog_set.fog_set_fixed_cost(10))
+                            fog_cost.append(fog_set.fog_set_fixed_cost(fixed_cost))
                         else:
                             if i == 0:
                                 traffic_list.append(t)
@@ -255,12 +271,12 @@ totalCost_2        = []
 edgeCost_2         = []
 fogCost_2          = []
 for index in range(len(total_cost)):
-    totalCost.append(sum([ c[index] for c in total_cost_list]) / len(total_cost_list))
-    edgeCost.append(sum([ c[index] for c in edge_cost_list]) / len(total_cost_list))
-    fogCost.append(sum([ c[index] for c in fog_cost_list]) / len(total_cost_list))
-    totalCost_2.append(sum([ c[index] for c in total_cost_list_2]) / len(total_cost_list))
-    edgeCost_2.append(sum([ c[index] for c in edge_cost_list_2]) / len(total_cost_list))
-    fogCost_2.append(sum([ c[index] for c in fog_cost_list_2]) / len(total_cost_list))
+    totalCost.append(sum([ c[index] for c in total_cost_list]) / len(total_cost_list)/120)
+    edgeCost.append(sum([ c[index] for c in edge_cost_list]) / len(total_cost_list)/120)
+    fogCost.append(sum([ c[index] for c in fog_cost_list]) / len(total_cost_list)/120)
+    totalCost_2.append(sum([ c[index] for c in total_cost_list_2]) / len(total_cost_list)/120)
+    edgeCost_2.append(sum([ c[index] for c in edge_cost_list_2]) / len(total_cost_list)/120)
+    fogCost_2.append(sum([ c[index] for c in fog_cost_list_2]) / len(total_cost_list)/120)
 
 
 
@@ -290,23 +306,27 @@ TOOLTIPS = [
     ]
 
 # create a new plot with a title and axis labels
-p = figure(plot_width=750, plot_height=500, x_axis_label='Araival Traffic', y_axis_label='Cost', tooltips=TOOLTIPS)
+p = figure(plot_width=600, plot_height=400, x_axis_label='Araival Traffic (mb/s)', y_axis_label='Percentage of Cost (%)', y_range=(0, 100), tooltips=TOOLTIPS)
 
 # add a line renderer with legend and line thickness
 
-p.line(traffic_list, totalCost, legend="Total.", line_width=2)
-p.line(traffic_list, edgeCost, legend="Edge.", line_width=2, line_color="dodgerblue")
-p.line(traffic_list, fogCost, legend="Fog.", line_width=2, line_color="deepskyblue")
-p.line(traffic_list, totalCost_2, legend="Total Two-tier.", line_width=2, line_color="red", line_dash="4 4")
-p.line(traffic_list, edgeCost_2, legend="Edge Two-tier.", line_width=2, line_color="tomato", line_dash="4 4")
-p.line(traffic_list, fogCost_2, legend="Fog Two-tier.", line_width=2, line_color="orange", line_dash="4 4")
+# p.line(traffic_list, totalCost, legend="Total Cost Three-tier", line_width=3, line_dash='solid')
+p.line(traffic_list, totalCost, legend="Total Cost Two-tier with RSU", line_width=3, line_dash='solid')
+p.line(traffic_list, edgeCost, legend="Edge Cost Two-tier with RSU", line_width=2, line_color="dodgerblue", line_dash='solid')
+p.line(traffic_list, fogCost, legend="Fog Cost Two-tier with RSU", line_width=2, line_color="deepskyblue", line_dash="dashdot")
+# p.line(traffic_list, totalCost_2, legend="Total Cost Two-tier", line_width=2, line_color="red")
+
+p.line(traffic_list, totalCost_2, legend="Total Cost Two-tier without RSU", line_width=2, line_color="red")
+p.line(traffic_list, edgeCost_2, legend="Edge Cost Two-tier without RSU", line_width=1, line_color="tomato")
+p.line(traffic_list, fogCost_2, legend="Fog Cost Two-tier without RSU", line_width=1, line_color="orange")
+
 # p.line(traffic_list, CP_cost, legend="CP.", line_width=3)
 # p.line(traffic_list, cost_cost, legend="cost.", line_width=3, line_color="#e84d60")
 # p.line(traffic_list, traffic_cost, legend="traffic.", line_width=3, line_color="lightseagreen")
 
-# p.circle(traffic_list, totalCost_2, fill_color="red", line_color="red", size=7)
-# p.circle(traffic_list, edgeCost_2, fill_color="tomato", line_color="tomato", size=7)
-# p.circle(traffic_list, fogCost_2, fill_color="pink", line_color="pink", size=7)
+p.circle(traffic_list, totalCost_2, legend="Total Cost Two-tier without RSU", fill_color="red", line_color="red", size=6)
+p.x(traffic_list, edgeCost_2, legend="Edge Cost Two-tier without RSU", line_color="tomato", size=5)
+p.circle(traffic_list, fogCost_2, legend="Fog Cost Two-tier without RSU", fill_color="white", line_color="orange", size=5)
 # p.circle(traffic_list, totalCost, size=7)
 # p.circle(traffic_list, edgeCost, fill_color="dodgerblue", line_color="dodgerblue", size=7)
 # p.circle(traffic_list, fogCost, fill_color="deepskyblue", line_color="deepskyblue", size=7)
@@ -314,12 +334,14 @@ p.line(traffic_list, fogCost_2, legend="Fog Two-tier.", line_width=2, line_color
 # p.circle(traffic_list, cost_cost, fill_color="#e84d60", line_color="#e84d60", size=7)
 # p.circle(traffic_list, traffic_cost, fill_color="lightseagreen", line_color="lightseagreen", size=7)
 
-p.xaxis.axis_label_text_font_size = "12pt"
-p.yaxis.axis_label_text_font_size = "12pt"
+p.xaxis.axis_label_text_font_size = "15pt"
+p.yaxis.axis_label_text_font_size = "15pt"
+p.xaxis.major_label_text_font_size = "12pt"
+p.yaxis.major_label_text_font_size = "12pt"
 p.legend.location = "top_left"
 # show the results
 # show(p)
 p.output_backend = "svg"
-export_svgs(p, filename="graph/S_fog/architecture/cost.svg")
+export_svgs(p, filename="graph/S_fog/architecture/a.svg")
 
 

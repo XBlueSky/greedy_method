@@ -64,7 +64,7 @@ source = ColumnDataSource(data=data)
 # output_file("graph/traffic-cost.html")
 output_file("graph/E_fog/composition/average_composition.html")
 
-p = figure(x_range=data['fogs'], y_range=(0, 100), plot_width=750, plot_height=500,
+p = figure(x_range=data['fogs'], y_range=(0, 100), plot_width=600, plot_height=400,
            toolbar_location=None, tools="")
 
 p.vbar(x=dodge('fogs', -0.2, range=p.x_range), top='cost', width=0.3, source=source,
@@ -83,8 +83,10 @@ p.yaxis.axis_label = "Normalized Unit"
 # p.legend.location = "top_left"
 p.legend.orientation = "horizontal"
 
-p.xaxis.axis_label_text_font_size = "12pt"
-p.yaxis.axis_label_text_font_size = "12pt"
+p.xaxis.axis_label_text_font_size = "15pt"
+p.yaxis.axis_label_text_font_size = "15pt"
+p.xaxis.major_label_text_font_size = "12pt"
+p.yaxis.major_label_text_font_size = "12pt"
 p.yaxis[0].ticker.desired_num_ticks = 10
 # ticker = SingleIntervalTicker(interval=5, num_minor_ticks=10)
 # yaxis = LinearAxis(ticker=ticker)
@@ -93,5 +95,5 @@ p.yaxis[0].ticker.desired_num_ticks = 10
 # show the results
 # show(p)
 p.output_backend = "svg"
-export_svgs(p, filename="graph/S_fog/composition/average_composition.svg")
+export_svgs(p, filename="graph/S_fog/composition/a.svg")
 
